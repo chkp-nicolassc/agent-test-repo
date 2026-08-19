@@ -1,0 +1,39 @@
+name: Triage new issue
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::896080425650:role/github-triage-invoker
+          aws-region: eu-west-1
+
+      - name: Invoke TriageAgent
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+        run: |
+          prompt=$(printf 'Triage this newly opened GitHub issue and create a corresponding Linear issue for it.\n\nNumber: #%s\nTitle: %s\nURL: %s\n\nBody:\n%s' \
+            "$ISSUE_NUMBER" "$ISSUE_TITLE" "$ISSUE_URL" "${ISSUE_BODY:0:4000}")
+
+          aws bedrock-agentcore invoke-agent-runtime \
+            --agent-runtime-arn arn:aws:bedrock-agentcore:eu-west-1:896080425650:runtime/TriageAgent-sj6I4XA4Hl \
+            --runtime-session-id "gh-issue-${ISSUE_NUMBER}-$(cat /proc/sys/kernel/random/uuid)" \
+            --content-type application/json \
+            --accept application/json \
+            --cli-binary-format raw-in-base64-out \
+            --payload "$(jq -nc --arg p "$prompt" '{prompt:$p}')" \
+            response.json
+
+          jq -r '.result.content[]?.text // empty' response.json >> "$GITHUB_STEP_SUMMARY"
