@@ -22,9 +22,22 @@ as a module and keeps the project root clean of implementation details.
   (e.g. `pip install -r requirements.txt`) and note any required
   environment variables or configuration files.
 
+## Testing
+
+- No test suite exists for this package yet. When adding tests, place them
+  under a top-level `tests/` directory (e.g. `tests/test_main.py`) mirroring
+  the module layout in `src/`.
+- Prefer `pytest` for new tests unless the project standardizes on another
+  framework, and document the test command here once one is chosen
+  (e.g. `pytest tests/`).
+
 ## Conventions for contributors
 
 - Add new modules directly under `src/` unless a subpackage is warranted.
 - Keep `__init__.py` files minimal; avoid adding logic there.
 - Follow standard Python style (PEP 8) for any code added to this package.
 - Update this README when the structure or purpose of the package changes.
+
+## See also
+
+- [Project root README](../README.md) for general project information.
