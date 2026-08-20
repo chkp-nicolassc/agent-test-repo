@@ -11,6 +11,7 @@ permissions:
 jobs:
   triage:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -23,6 +24,9 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
+          # An invocation creates a Linear issue and merges a pull request, so a
+          # second attempt does that work a second time. One attempt only.
+          AWS_MAX_ATTEMPTS: 1
         run: |
           prompt=$(printf 'Triage this newly opened GitHub issue and create a corresponding Linear issue for it.\n\nNumber: #%s\nTitle: %s\nURL: %s\n\nBody:\n%s' \
             "$ISSUE_NUMBER" "$ISSUE_TITLE" "$ISSUE_URL" "${ISSUE_BODY:0:4000}")
@@ -33,6 +37,8 @@ jobs:
             --content-type application/json \
             --accept application/json \
             --cli-binary-format raw-in-base64-out \
+            --cli-connect-timeout 10 \
+            --cli-read-timeout 900 \
             --payload "$(jq -nc --arg p "$prompt" '{prompt:$p}')" \
             response.json
 
