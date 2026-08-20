@@ -13,6 +13,15 @@ as a module and keeps the project root clean of implementation details.
 - `__init__.py` — marks this directory as a Python package.
 - `main.py` — entry point / placeholder for the package's code.
 
+## Setup notes
+
+- No external dependencies are required to import this package.
+- To run the entry point locally, execute it as a module from the project
+  root, e.g. `python -m src.main`.
+- If dependencies are introduced later, document how to install them here
+  (e.g. `pip install -r requirements.txt`) and note any required
+  environment variables or configuration files.
+
 ## Conventions for contributors
 
 - Add new modules directly under `src/` unless a subpackage is warranted.
